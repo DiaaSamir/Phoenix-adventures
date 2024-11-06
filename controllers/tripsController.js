@@ -3,7 +3,89 @@ const catchAsync = require('./../utils/catchAsync');
 const client = require('../db');
 const AppError = require('../utils/appError');
 const Email = require('../utils/email');
-const { now } = require('mongoose');
+const cloudinary = require('./../utils/cloudinary');
+const upload = require('./../utils/multer');
+const { Readable } = require('stream');
+const { default: axios } = require('axios');
+
+exports.uploadTripImages = catchAsync(async (req, res, next) => {
+  // Handle single and multiple file uploads with multer
+  upload.fields([
+    { name: 'image-cover', maxCount: 1 },
+    { name: 'images', maxCount: 10 },
+  ])(req, res, async (err) => {
+    if (err) {
+      return next(new AppError(`Upload Error: ${err.message}`, 400));
+    }
+
+    // Check if image cover was uploaded
+    if (!req.files['image-cover']) {
+      return next(new AppError('No image cover uploaded', 400));
+    }
+
+    // Handle uploading `image-cover` to Cloudinary
+    const coverFile = req.files['image-cover'][0];
+    const coverStream = new Readable();
+    coverStream.push(coverFile.buffer);
+    coverStream.push(null);
+
+    const coverResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'image' },
+        (error, result) => {
+          if (error)
+            reject(new AppError(`Cloudinary Error: ${error.message}`, 500));
+          else resolve(result);
+        }
+      );
+      coverStream.pipe(uploadStream);
+    });
+
+    // Update the `image_cover` field in the database
+    await client.query(`UPDATE trips SET image_cover = $1 WHERE id = $2`, [
+      coverResult.secure_url,
+      req.params.id,
+    ]);
+
+    // Check if additional images were uploaded
+    const imageUrls = [];
+    if (req.files['images']) {
+      for (const file of req.files['images']) {
+        const stream = new Readable();
+        stream.push(file.buffer);
+        stream.push(null);
+
+        // Upload each image to Cloudinary
+        const result = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { resource_type: 'image' },
+            (error, result) => {
+              if (error)
+                reject(new AppError(`Cloudinary Error: ${error.message}`, 500));
+              else resolve(result);
+            }
+          );
+          stream.pipe(uploadStream);
+        });
+
+        imageUrls.push(result.secure_url);
+      }
+
+      // Update the `images` field in the database
+      await client.query(
+        `UPDATE trips SET images = $1 WHERE id = $2 RETURNING *`,
+        [imageUrls, req.params.id]
+      );
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Uploaded trip images successfully',
+      imageCover: coverResult.secure_url,
+      images: imageUrls,
+    });
+  });
+});
 
 exports.updateTripStatus = catchAsync(async (req, res, next) => {
   await client.query(
@@ -23,7 +105,6 @@ exports.updateTripStatus = catchAsync(async (req, res, next) => {
 exports.getAllTrips = factory.getAll('trips');
 
 exports.getTrip = factory.getOne('trips');
-
 exports.deleteTrip = factory.deleteOne('trips');
 
 exports.updateone = factory.updateOne('trips');
@@ -69,15 +150,6 @@ exports.createTrip = catchAsync(async (req, res, next) => {
     );
   }
 
-  await client.query(
-    `UPDATE trips
-   SET status = CASE
-     WHEN CURRENT_DATE < start_date THEN 'Not started'
-     WHEN CURRENT_DATE BETWEEN start_date AND end_date THEN 'Ongoing'
-     WHEN CURRENT_DATE > end_date THEN 'Reservation ended'
-     ELSE 'Unknown status'
-   END`
-  );
   res.status(200).json({
     status: 'success',
     message: 'Created your trip successfully',

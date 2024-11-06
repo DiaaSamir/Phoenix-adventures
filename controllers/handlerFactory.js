@@ -7,9 +7,7 @@ const { now } = require('mongoose');
 const axios = require('axios');
 const PDFDocument = require('pdfkit');
 const cloudinary = require('./../utils/cloudinary');
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = require('./../utils/multer');
 
 exports.getAll = (modelName) =>
   catchAsync(async (req, res, next) => {

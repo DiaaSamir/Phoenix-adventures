@@ -13,12 +13,23 @@ router
     tripsController.updateTripStatus,
     tripsController.getAllTrips
   )
-  .post(authController.restrictTo('admin'), tripsController.createTrip);
+  .post(
+    authController.restrictTo('admin'),
+    tripsController.createTrip,
+    tripsController.updateTripStatus
+  );
 
 router
   .route('/receipts/:id')
   .get(authController.restrictTo('admin'), tripsController.getTripReceipts)
   .post(authController.restrictTo('user'), tripsController.tripReceiptUpload);
+
+router
+  .route('/images-upload/:id')
+  .post(
+    authController.restrictTo('admin'),
+    tripsController.uploadTripImages
+  );
 router
   .route('/:id')
   .patch(authController.restrictTo('admin'), tripsController.updateTrip)
