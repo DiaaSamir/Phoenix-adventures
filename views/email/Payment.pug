@@ -1,0 +1,60 @@
+doctype html
+html
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Complete Your Payment
+    style.
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        border-radius: 8px 8px 0 0;
+      }
+      .content {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .code {
+        font-size: 24px;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+        display: inline-block;
+        letter-spacing: 2px;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 12px;
+        color: #777;
+        text-align: center;
+      }
+  body
+    .container
+      .header
+        h1 Complete Your Payment
+      .content
+        p Hi #{firstName},
+        p To complete your reservation, please use the Vodafone Cash code below to make the payment of #{value} EGP.
+        p  Vodafone Cash number is:
+        .code #{vodafoneCash}
+      .footer
+        p If you have any questions, feel free to reply to this email.
+        p Thank you for choosing Phoenix Adventures!

@@ -1,0 +1,70 @@
+doctype html
+html
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Customized Trip Price Notification
+    style.
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e0e0e0;
+      }
+      .header {
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        border-radius: 12px 12px 0 0;
+      }
+      .content {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .price {
+        font-size: 26px;
+        font-weight: bold;
+        background-color: #e8f5e9;
+        padding: 15px;
+        border-radius: 8px;
+        display: inline-block;
+        letter-spacing: 1px;
+        margin: 10px 0;
+      }
+      .vodafone-cash {
+        font-size: 20px;
+        margin: 15px 0;
+        font-weight: bold;
+        color: #4CAF50;
+      }
+      .footer {
+        margin-top: 30px;
+        font-size: 14px;
+        color: #777;
+        text-align: center;
+      }
+  body
+    .container
+      .header
+        h1 Customized Trip Price Notification
+      .content
+        p Hi #{userName},
+        p We are excited to inform you about the pricing details for your customized trip.
+        p The total payment amount is:
+        .price #{value} EGP
+        p To complete your reservation, please use the Vodafone Cash code below to make the payment.
+        .vodafone-cash Vodafone Cash number: #{vodafoneCash}
+        p After making the payment, please upload your receipt on our website to complete the reservation.
+        p If you have any questions or if you would like to proceed with the booking, feel free to reach out!
+      .footer
+        p Thank you for choosing Phoenix Adventures!
