@@ -5,11 +5,12 @@ const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
-
+const schedule = require('node-schedule');
 const errorController = require('./controllers/errorController');
 const tripsRouter = require('./routes/tripsRoutes');
 const userRouter = require('./routes/userRoutes');
 const customizedTripsRouter = require('./routes/customizedTripRoutes');
+const client = require('./db');
 
 const app = express();
 
@@ -39,6 +40,26 @@ app.use(express.json({ limit: '50kb' }));
 app.use(express.static(`${__dirname}/public`));
 
 app.use(express.json());
+
+schedule.scheduleJob('0 0 * * *', async () => {
+  const thirtyDaysAgo = new Date(
+    Date.now() - 30 * 24 * 60 * 60 * 1000
+  ).toISOString();
+
+  try {
+    // Delete users who have been inactive for 30 days or more
+    const result = await client.query(
+      `DELETE FROM users 
+       WHERE active = false 
+       AND last_logged_in <= $1`,
+      [thirtyDaysAgo]
+    );
+
+    console.log(`Deleted ${result.rowCount} inactive users.`);
+  } catch (error) {
+    console.error('Error deleting inactive users:', error);
+  }
+});
 
 app.use('/api/v1/trips', tripsRouter);
 app.use('/api/v1/users', userRouter);
