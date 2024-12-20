@@ -5,15 +5,11 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
-router.use(authController.protect);
 router
   .route('/')
-  .get(
-    authController.restrictTo('admin', 'user'),
-    tripsController.updateTripStatus,
-    tripsController.getAllTrips
-  )
+  .get(tripsController.updateTripStatus, tripsController.getAllTrips)
   .post(
+    authController.protect,
     authController.restrictTo('admin'),
     tripsController.createTrip,
     tripsController.updateTripStatus
@@ -21,25 +17,44 @@ router
 
 router
   .route('/receipts/:id')
-  .get(authController.restrictTo('admin'), tripsController.getTripReceipts)
-  .post(authController.restrictTo('user'), tripsController.tripReceiptUpload);
+  .get(
+    authController.protect,
+    authController.restrictTo('admin'),
+    tripsController.getTripReceipts
+  )
+  .post(
+    authController.protect,
+    authController.restrictTo('user'),
+    tripsController.tripReceiptUpload
+  );
 
 router
   .route('/images-upload/:id')
   .post(
+    authController.protect,
     authController.restrictTo('admin'),
     tripsController.uploadTripImages
   );
 router
   .route('/:id')
-  .patch(authController.restrictTo('admin'), tripsController.updateTrip)
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin'),
+    tripsController.updateTrip
+  )
   .get(
+    authController.protect,
     authController.restrictTo('admin', 'user'),
     tripsController.updateTripStatus,
     tripsController.getTrip
   )
-  .delete(authController.restrictTo('admin'), tripsController.deleteTrip)
+  .delete(
+    authController.protect,
+    authController.restrictTo('admin'),
+    tripsController.deleteTrip
+  )
   .post(
+    authController.protect,
     authController.restrictTo('user'),
     tripsController.updateTripStatus,
     tripsController.applyForTrip
